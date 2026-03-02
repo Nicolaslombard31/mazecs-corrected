@@ -33,6 +33,15 @@ const string sWin = """
 const string sCanceled = "\n  Partie abandonnée. À bientôt !";
 const string sPressKey = "  Appuyez sur une key pour quitter...";
 
+const ConsoleColor SuccessColor     = ConsoleColor.Green;
+const ConsoleColor DangerColor      = ConsoleColor.Red;
+const ConsoleColor InfoColor        = ConsoleColor.Cyan;
+const ConsoleColor InstructionColor = ConsoleColor.DarkCyan;
+const ConsoleColor WallColor        = ConsoleColor.DarkGray;
+const ConsoleColor CorridorColor    = ConsoleColor.DarkBlue;
+const ConsoleColor PlayerColor      = ConsoleColor.Yellow;
+const ConsoleColor ExitColor        = ConsoleColor.Green;
+
 // ── Génération du labyrinthe par « recursive backtracker » ──
 const int cellW = width / 2;   // 25
 const int cellH = height / 2;   // 10
@@ -103,7 +112,7 @@ Console.Clear();
 Console.CursorVisible = false;
 
 Console.SetCursorPosition(0, 0);
-Console.ForegroundColor = ConsoleColor.Cyan;
+Console.ForegroundColor = InfoColor;
 Console.WriteLine(sHeader);
 Console.ResetColor();
 
@@ -113,15 +122,15 @@ for (var y = 0; y < height; y++)
     {
         Console.SetCursorPosition(offsetX + x, offsetY + y);
         var cell = grid[x, y];
-        if (cell == CellType.Wall)      { Console.ForegroundColor = ConsoleColor.DarkGray;  Console.Write("█"); }
-        else if (cell == CellType.Player) { Console.ForegroundColor = ConsoleColor.Yellow;    Console.Write("@"); }
-        else if (cell == CellType.Exit) { Console.ForegroundColor = ConsoleColor.Green;     Console.Write("★"); }
-        else                { Console.ForegroundColor = ConsoleColor.DarkBlue;  Console.Write("·"); }
+        if (cell == CellType.Wall)        { Console.ForegroundColor = WallColor    ; Console.Write("█"); }
+        else if (cell == CellType.Player) { Console.ForegroundColor = PlayerColor  ; Console.Write("@"); }
+        else if (cell == CellType.Exit)   { Console.ForegroundColor = ExitColor    ; Console.Write("★"); }
+        else                              { Console.ForegroundColor = CorridorColor; Console.Write("·"); }
     }
 }
 
 Console.SetCursorPosition(0, offsetY + height + 1);
-Console.ForegroundColor = ConsoleColor.DarkCyan;
+Console.ForegroundColor = InstructionColor;
 Console.Write(sInstructions);
 Console.ResetColor();
 
@@ -130,10 +139,10 @@ void DrawCell(int cx, int cy)
 {
     Console.SetCursorPosition(offsetX + cx, offsetY + cy);
     var cell = grid[cx, cy];
-    if (cell == CellType.Wall)      { Console.ForegroundColor = ConsoleColor.DarkGray;  Console.Write("█"); }
-    else if (cell == CellType.Player) { Console.ForegroundColor = ConsoleColor.Yellow;    Console.Write("@"); }
-    else if (cell == CellType.Exit) { Console.ForegroundColor = ConsoleColor.Green;     Console.Write("★"); }
-    else                { Console.ForegroundColor = ConsoleColor.DarkBlue;  Console.Write("·"); }
+    if (cell == CellType.Wall)        { Console.ForegroundColor = WallColor    ; Console.Write("█"); }
+    else if (cell == CellType.Player) { Console.ForegroundColor = PlayerColor  ; Console.Write("@"); }
+    else if (cell == CellType.Exit)   { Console.ForegroundColor = ExitColor    ; Console.Write("★"); }
+    else                              { Console.ForegroundColor = CorridorColor; Console.Write("·"); }
     Console.ResetColor();
 }
 
@@ -173,13 +182,13 @@ while (!won)
 Console.SetCursorPosition(0, offsetY + height + marginYMessage);
 if (won)
 {
-    Console.ForegroundColor = ConsoleColor.Green;
+    Console.ForegroundColor = SuccessColor;
     Console.WriteLine(sWin);
     Console.ResetColor();
 }
 else
 {
-    Console.ForegroundColor = ConsoleColor.Red;
+    Console.ForegroundColor = DangerColor;
     Console.WriteLine(sCanceled);
     Console.ResetColor();
 }
