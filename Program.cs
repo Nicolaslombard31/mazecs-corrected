@@ -1,12 +1,9 @@
 #region Constants
-const int width = 50;
-const int height = 20;
+var size = new Vec2d(50, 20);
 
-const int offsetY = 3;
-const int offsetX = 0;
+var offset = new Vec2d(0,3);
 
-const int marginYMessage = 3;
-const int messageHeight = 5;
+var message = new Vec2d(3,5);
 
 const string sHeader = """
     ╔══════════════════════════════════════════════════╗
@@ -33,45 +30,45 @@ const ConsoleColor PlayerColor      = ConsoleColor.Yellow;
 const ConsoleColor ExitColor        = ConsoleColor.Green;
 #endregion 
 
-var grid = new CellType[width, height];
+var grid = new GameConstants.CellType[size.X,size.Y];
 
 var playerX = 0;
 var playerY = 0;
-var mode = State.Playing;
+var mode = GameConstants.State.Playing;
 
 GenerateMaze(grid, playerX, playerY);
 DrawScreen();
 
-while (mode == State.Playing)
+while (mode == GameConstants.State.Playing)
 {
     var key = Console.ReadKey(true).Key;
 
     var nx2 = playerX;
     var ny2 = playerY;
 
-    switch (key)
+    switch (key)    
     {
         case ConsoleKey.Z or ConsoleKey.UpArrow:    ny2--; break;
         case ConsoleKey.S or ConsoleKey.DownArrow:  ny2++; break;
         case ConsoleKey.Q or ConsoleKey.LeftArrow:  nx2--; break;
         case ConsoleKey.D or ConsoleKey.RightArrow: nx2++; break;
-        case ConsoleKey.Escape: mode = State.Canceled; break;
+        case ConsoleKey.Escape: mode = GameConstants.State.Canceled; break;
     }
-    if (InBound(nx2, width) && InBound(ny2, height) && grid[nx2, ny2] != CellType.Wall)
+    if (InBound(nx2, size.X) && InBound(ny2,size.Y) && grid[nx2, ny2] != GameConstants.CellType.Wall)
     {
-        if (grid[nx2, ny2] == CellType.Exit) mode = State.Won;
+        if (grid[nx2, ny2] == GameConstants.CellType.Exit) mode = GameConstants.State.Won;
 
-        UpdateCell(playerX      , playerY      , CellType.Corridor);
-        UpdateCell(playerX = nx2, playerY = ny2, CellType.Player  );
+        UpdateCell(playerX      , playerY      , GameConstants.CellType.Corridor);
+        UpdateCell(playerX = nx2, playerY = ny2, GameConstants.CellType.Player  );
     }
 }
 
-DrawTextColorXY(0, offsetY + height + marginYMessage,
-    mode == State.Won 
+DrawTextColorXY(0, offset.Y +size.Y + message.X,
+    mode == GameConstants.State.Won 
     ? (sWin, SuccessColor) 
     : (sCanceled, DangerColor)
 );
-DrawTextXY(0, offsetY + height + marginYMessage + messageHeight, sPressKey);
+DrawTextXY(0, offset.Y +size.Y + message.X + message.Y, sPressKey);
 Console.CursorVisible = true;
 Console.ReadKey(true);
 
@@ -92,17 +89,17 @@ void DrawTextColorXY(int x, int y, (string text, ConsoleColor color) info) =>
     DrawTextXY(x, y, info.text, info.color);
 
 void DrawCell(int cx, int cy) => DrawTextColorXY(
-    offsetX + cx, 
-    offsetY + cy,
+    offset.X + cx, 
+    offset.Y + cy,
     grid[cx, cy] switch
     {
-        CellType.Wall   => ("█", WallColor),
-        CellType.Player => ("@", PlayerColor),
-        CellType.Exit   => ("★", ExitColor),
+        GameConstants.CellType.Wall   => ("█", WallColor),
+        GameConstants.CellType.Player => ("@", PlayerColor),
+        GameConstants.CellType.Exit   => ("★", ExitColor),
         _               => ("·", CorridorColor)
     });
 
-void UpdateCell(int cx, int cy, CellType type)
+void UpdateCell(int cx, int cy, GameConstants.CellType type)
 {
     grid[cx, cy] = type;
     DrawCell(cx, cy);
@@ -114,23 +111,23 @@ void DrawScreen()
     Console.CursorVisible = false;
 
     DrawTextXY(0, 0, sHeader, InfoColor);
-    for (var y = 0; y < height; y++)
+    for (var y = 0; y <size.Y; y++)
     {
-        for (var x = 0; x < width; x++)
+        for (var x = 0; x < size.X; x++)
         {
             DrawCell(x, y);
         }
     }
-    DrawTextXY(0, offsetY + height, sInstructions, InstructionColor);
+    DrawTextXY(0, offset.Y +size.Y, sInstructions, InstructionColor);
 }
 
 bool InBound(int val, int max) => val >= 0 && val < max;
 
-void GenerateMaze(CellType[,] grid, int playerStartX, int playerStartY)
+void GenerateMaze(GameConstants.CellType[,] grid, int playerStartX, int playerStartY)
 {
-    for (var y = 0; y < height; y++)
-        for (var x = 0; x < width; x++)
-            grid[x, y] = CellType.Wall;
+    for (var y = 0; y <size.Y; y++)
+        for (var x = 0; x < size.X; x++)
+            grid[x, y] = GameConstants.CellType.Wall;
 
     int[] dx = [ 0, 1, 0, -1 ];
     int[] dy = [ -1, 0, 1, 0 ];
@@ -144,22 +141,22 @@ void GenerateMaze(CellType[,] grid, int playerStartX, int playerStartY)
 
     GenerateMazeRec(playerStartX, playerStartY);
 
-    var outX = (width  - 1) & ~1;
-    var outY = (height - 1) & ~1;
+    var outX = (size.X  - 1) & ~1;
+    var outY = (size.Y - 1) & ~1;
 
-    grid[playerStartX, playerStartY] = CellType.Player;
-    grid[outX, outY] = CellType.Exit;
+    grid[playerStartX, playerStartY] = GameConstants.CellType.Player;
+    grid[outX, outY] = GameConstants.CellType.Exit;
     
     void GenerateMazeRec(int x, int y)
     {
-        grid[x, y] = CellType.Corridor;
+        grid[x, y] = GameConstants.CellType.Corridor;
         foreach (var dir in orders[rng.Next(orders.Length)])
         {
-            if( InMaze(x, dx[dir], width , out var nx) && 
-                InMaze(y, dy[dir], height, out var ny) && 
-                grid[nx, ny] == CellType.Wall)
+            if( InMaze(x, dx[dir], size.X , out var nx) && 
+                InMaze(y, dy[dir],size.Y, out var ny) && 
+                grid[nx, ny] == GameConstants.CellType.Wall)
             {
-                grid[(x + nx) / 2, (y + ny) / 2] = CellType.Corridor;
+                grid[(x + nx) / 2, (y + ny) / 2] = GameConstants.CellType.Corridor;
                 GenerateMazeRec(nx, ny);
             }
         }
@@ -168,19 +165,4 @@ void GenerateMaze(CellType[,] grid, int playerStartX, int playerStartY)
     }
 }
 #endregion
-
-#region Enums
-enum State
-{
-    Playing,
-    Won,
-    Canceled
-}
-enum CellType
-{
-    Corridor = 0,
-    Wall = 1,
-    Player = 2,
-    Exit = 3
-}
-#endregion
+public record Vec2d(int X, int Y);
