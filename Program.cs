@@ -39,29 +39,43 @@ var mode = GameConstants.State.Playing;
 GenerateMaze(grid, playerX, playerY);
 DrawScreen();
 
+// ... (Initialisation, génération, etc.)
+
 while (mode == GameConstants.State.Playing)
 {
-    var key = Console.ReadKey(true).Key;
+    // On récupère l'intention du joueur via le contrôleur
+    var action = KeyboardController.GetAction();
 
-    var nx2 = playerX;
-    var ny2 = playerY;
+    int nx2 = playerX;
+    int ny2 = playerY;
 
-    switch (key)    
+    // On traite l'action de manière logique
+    switch (action)
     {
-        case ConsoleKey.Z or ConsoleKey.UpArrow:    ny2--; break;
-        case ConsoleKey.S or ConsoleKey.DownArrow:  ny2++; break;
-        case ConsoleKey.Q or ConsoleKey.LeftArrow:  nx2--; break;
-        case ConsoleKey.D or ConsoleKey.RightArrow: nx2++; break;
-        case ConsoleKey.Escape: mode = GameConstants.State.Canceled; break;
+        case KeyboardController.Action.Up:    ny2--; break;
+        case KeyboardController.Action.Down:  ny2++; break;
+        case KeyboardController.Action.Left:  nx2--; break;
+        case KeyboardController.Action.Right: nx2++; break;
+        case KeyboardController.Action.Quit:  mode = GameConstants.State.Canceled; break;
+        case KeyboardController.Action.None:  continue; // On ne fait rien si aucune touche utile
     }
-    if (InBound(nx2, size.X) && InBound(ny2,size.Y) && grid[nx2, ny2] != GameConstants.CellType.Wall)
+
+    // Logique de collision et déplacement (inchangée mais plus claire)
+    if (InBound(nx2, size.X) && InBound(ny2, size.Y) && grid[nx2, ny2] != GameConstants.CellType.Wall)
     {
         if (grid[nx2, ny2] == GameConstants.CellType.Exit) mode = GameConstants.State.Won;
 
-        UpdateCell(playerX      , playerY      , GameConstants.CellType.Corridor);
-        UpdateCell(playerX = nx2, playerY = ny2, GameConstants.CellType.Player  );
+        UpdateCell(playerX, playerY, GameConstants.CellType.Corridor);
+        playerX = nx2; 
+        playerY = ny2;
+        UpdateCell(playerX, playerY, GameConstants.CellType.Player);
     }
 }
+
+// ... (Affichage de fin)
+
+// Utilisation de la méthode utilitaire pour quitter
+KeyboardController.WaitForKey();
 
 DrawTextColorXY(0, offset.Y +size.Y + message.X,
     mode == GameConstants.State.Won 
